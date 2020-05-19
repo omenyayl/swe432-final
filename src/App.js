@@ -20,7 +20,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
 import Paper from "@material-ui/core/Paper";
 
-const API = "http://localhost:8080/final";
+const API = "https://olegs-tech.space/final";
 
 const TruthTable = ({ truthList }) => {
 
@@ -67,13 +67,19 @@ const App = () => {
     const [snackbarShown, setSnackbarShown] = useState(false);
     const [errorMessage, setErrorMessage] = useState("Please input a valid expression");
 
+    function translateSyntax(expression) {
+        expression = expression.replace(/(\s+(and)\s+)|(\s+(AND)\s+)|(\s+(\&)\s+)/g, " && ");
+        expression = expression.replace(/(\s+(or)\s+)|(\s+(OR)\s+)|(\s+(\|)\s+)/g, " || ");
+        return expression;
+    }
+
     function onExecute(expression) {
         if (expression === null || expression === '') {
             setSnackbarShown(true);
             setErrorMessage("Please input an expression");
             return;
         }
-        axios.post(API, { expression })
+        axios.post(API, { expression: translateSyntax(expression) })
             .then(res => {
                 if (typeof res.data === 'string') {
                     setErrorMessage("Your expression is invalid");
@@ -95,10 +101,15 @@ const App = () => {
                     Boolean Expression
                 </Typography>
                 <CardContent>
-                    <div className="margin-1">
+                    <div className="margin-1 align-left">
+                        <strong>Input your expression below</strong>
+                        <p>* Example: A && B && C || (D && E)</p>
+                        <p>* use the following symbols for logical AND: and, AND, &, &&</p>
+                        <p>* use the following symbols for logical OR: or, OR, |, ||</p>
+                        <p>* Make sure to add spaces between logical operators and boolean variables</p>
                         <TextField
                             multiline={true}
-                            helperText={"Input Expression *format: A && B || C && (Apple || D)*"}
+                            helperText={"Expression"}
                             onChange={(e) => { setExpression(e.target.value) }}
                             fullWidth={true}/>
                     </div>
